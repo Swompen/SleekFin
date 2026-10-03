@@ -2,15 +2,15 @@
 
 <div alt style="text-align: center; transform: scale(.25);">
 	<picture>
-		<source media="(prefers-color-scheme: dark)" srcset="https://github.com/varunaditya-plus/SleekFin/raw/main/assets/logo_dark.png" />
-		<img alt="SleekFin Logo" src="https://github.com/varunaditya-plus/SleekFin/raw/main/assets/logo_light.png" style="width: 170px;" />
+		<source media="(prefers-color-scheme: dark)" srcset="https://github.com/Swompen/SleekFin/raw/main/assets/logo_dark.png" />
+		<img alt="SleekFin Logo" src="https://github.com/Swompen/SleekFin/raw/main/assets/logo_light.png" style="width: 170px;" />
 	</picture>
 </div>
 
 # SleekFin
-![GitHub License](https://www.shieldcn.dev/github/license/varunaditya-plus/SleekFin.svg?variant=outline&size=sm)
-[![GitHub Downloads (all assets, all releases)](https://shieldcn.dev/github/downloads/varunaditya-plus/SleekFin.svg?variant=outline&size=sm)](https://github.com/varunaditya-plus/SleekFin/releases/latest)
-[![GitHub Release](https://shieldcn.dev/github/release/varunaditya-plus/SleekFin.svg?size=sm)](https://github.com/varunaditya-plus/SleekFin/releases/latest)
+![GitHub License](https://www.shieldcn.dev/github/license/Swompen/SleekFin.svg?variant=outline&size=sm)
+[![GitHub Downloads (all assets, all releases)](https://shieldcn.dev/github/downloads/Swompen/SleekFin.svg?variant=outline&size=sm)](https://github.com/Swompen/SleekFin/releases/latest)
+[![GitHub Release](https://shieldcn.dev/github/release/Swompen/SleekFin.svg?size=sm)](https://github.com/Swompen/SleekFin/releases/latest)
 ![Please star this repo](https://shieldcn.dev/badge/★%20please%20star-22c55e.svg?theme=amber&color=eab308&size=sm&variant=outline)
 
 The ultimate customisation plugin for Jellyfin, which fully reskins Jellyfin to give it a modern, refreshed look. This plugin is like a superpowered theme, with precise customisation, letting you tweak the plugin as you'd like.
@@ -41,10 +41,13 @@ The ultimate customisation plugin for Jellyfin, which fully reskins Jellyfin to 
 - [File Transformation](https://www.iamparadox.dev/jellyfin/plugins/manifest.json) plugin
 
 ### Install from plugin catalog
+
+If the upstream SleekFin catalog is already configured, remove the upstream `varunaditya-plus/SleekFin` manifest before adding this fork. The fork preserves the plugin identity for configuration compatibility, disables automatic updates, and must be updated manually from this fork's catalog so an upstream release cannot silently replace it.
+
 1. Open **Dashboard → Plugins → Manage Repositories**.
 2. Click **New Repository** and paste this repository URL:
 ```
-https://raw.githubusercontent.com/varunaditya-plus/SleekFin/main/manifest.json
+https://raw.githubusercontent.com/Swompen/SleekFin/main/manifest.json
 ```
 3. Now, in the sidebar, go to **Plugins**, select **All** in the filters above the plugins, click SleekFin, and click **Install**.
 4. Now you have to restart your Jellyfin instance. Go to **Dashboard** and click the **Restart** button. You're done!
@@ -69,11 +72,11 @@ After installation, go to **Dashboard → SleekFin**. The **Overview** tab conta
 ## Downloads
 
 <p align="center">
-  <a href="https://downloadhistory.varunaditya.xyz/#varunaditya-plus/SleekFin&Date">
+  <a href="https://downloadhistory.varunaditya.xyz/#Swompen/SleekFin&Date">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://downloadhistory.varunaditya.xyz/svg?repos=varunaditya-plus/SleekFin&type=Date&title=&theme=dark" />
-      <source media="(prefers-color-scheme: light)" srcset="https://downloadhistory.varunaditya.xyz/svg?repos=varunaditya-plus/SleekFin&type=Date&title=" />
-      <img alt="Download History Chart" src="https://downloadhistory.varunaditya.xyz/svg?repos=varunaditya-plus/SleekFin&type=Date&title=" width=600 />
+      <source media="(prefers-color-scheme: dark)" srcset="https://downloadhistory.varunaditya.xyz/svg?repos=Swompen/SleekFin&type=Date&title=&theme=dark" />
+      <source media="(prefers-color-scheme: light)" srcset="https://downloadhistory.varunaditya.xyz/svg?repos=Swompen/SleekFin&type=Date&title=" />
+      <img alt="Download History Chart" src="https://downloadhistory.varunaditya.xyz/svg?repos=Swompen/SleekFin&type=Date&title=" width=600 />
     </picture>
   </a>
 </p>

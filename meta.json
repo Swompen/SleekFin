@@ -5,12 +5,12 @@
   "guid": "da36c4ef-1d10-4169-8a68-26b194d5301a",
   "name": "SleekFin",
   "overview": "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
-  "owner": "varunaditya-plus",
+  "owner": "Swompen",
   "targetAbi": "12.0.0.0",
   "timestamp": "2026-10-03T10:43:43.0000000Z",
   "version": "1.4.2.2",
   "status": "Active",
-  "autoUpdate": true,
+  "autoUpdate": false,
   "assemblies": [
     "Jellyfin.Plugin.SleekFin.dll"
   ]

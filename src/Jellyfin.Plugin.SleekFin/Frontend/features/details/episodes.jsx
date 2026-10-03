@@ -1,4 +1,5 @@
 import { Fragment, h, Icon, IconButton, item, dom, render, SectionHeading, useEffect, useMemo, useRef, useState } from '../../shared/runtime.js';
+import { installEpisodeNavigation, syncEpisodeNavigation } from './episode-navigation.js';
 
 // Roughly six rows. Below this the space under a trigger is too cramped to be worth keeping the
 // menu anchored to it, so the menu is allowed to flip above instead.
@@ -22,7 +23,7 @@ function EpisodeCard({ client, episode }) {
 
   return (
     <article class="sleekfin-details-episode">
-      <button {...action} type="button" class={`sleekfin-details-episode-action ${actionClass}`}>
+      <button {...action} type="button" class={`sleekfin-details-episode-action ${actionClass}`} data-episode-id={episode.Id} tabIndex={-1}>
         {imageUrl && <img src={imageUrl} />}
         <span class="sleekfin-details-episode-shade" />
         <span class="sleekfin-details-episode-copy">
@@ -87,6 +88,7 @@ function Episodes({ client, list, mediaItem, seasons, seasonPickerEnabled }) {
   const [status, setStatus] = useState(firstSeason ? 'loading' : 'error');
   const [view, setView] = useState('grid');
   const requestGeneration = useRef(0);
+  const episodeFocusPending = useRef(false);
   const searchInput = useRef(null);
   const seasonSelect = useRef(null);
   const seasonMenu = useRef(null);
@@ -106,6 +108,8 @@ function Episodes({ client, list, mediaItem, seasons, seasonPickerEnabled }) {
   }, [searchOpen]);
 
   useEffect(() => () => window.clearTimeout(seasonSearchTimer.current), []);
+
+  useEffect(() => installEpisodeNavigation(list), [list]);
 
   useEffect(() => {
     if (!seasonMenuOpen) return undefined;
@@ -283,6 +287,7 @@ function Episodes({ client, list, mediaItem, seasons, seasonPickerEnabled }) {
   }, [episodes, query, sortDescending]);
 
   useEffect(() => {
+    const restoreFocus = episodeFocusPending.current || list.contains(document.activeElement);
     list.dataset.view = view;
     render(
       <Fragment>
@@ -292,6 +297,8 @@ function Episodes({ client, list, mediaItem, seasons, seasonPickerEnabled }) {
       </Fragment>,
       list,
     );
+    syncEpisodeNavigation(list, { restoreFocus });
+    episodeFocusPending.current = restoreFocus && !list.querySelector('.sleekfin-details-episode-action');
     if (window.CustomElements && typeof window.CustomElements.upgradeSubtree === 'function') {
       window.CustomElements.upgradeSubtree(list);
     }

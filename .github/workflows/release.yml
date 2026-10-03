@@ -11,7 +11,7 @@ permissions:
 env:
   JELLYFIN_VERSION: "12.0.0"
   TARGET_ABI: "12.0.0.0"
-  REPO_OWNER: "varunaditya-plus"
+  REPO_OWNER: "Swompen"
   REPO_NAME: "SleekFin"
   CSPROJ: "src/Jellyfin.Plugin.SleekFin/Jellyfin.Plugin.SleekFin.csproj"
   ASSEMBLY_INFO: "src/Jellyfin.Plugin.SleekFin/Properties/AssemblyInfo.cs"
@@ -138,12 +138,12 @@ jobs:
               guid: "da36c4ef-1d10-4169-8a68-26b194d5301a",
               name: "SleekFin",
               overview: "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
-              owner: "varunaditya-plus",
+              owner: "Swompen",
               targetAbi: $targetAbi,
               timestamp: $timestamp,
               version: $version,
               status: "Active",
-              autoUpdate: true,
+              autoUpdate: false,
               assemblies: ["Jellyfin.Plugin.SleekFin.dll"]
             }' > "${OUT_DIR}/meta.json"
 
