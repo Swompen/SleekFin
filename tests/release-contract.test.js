@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
+import { promisify } from 'node:util';
+
+const exec = promisify(execFile);
 
 const FORK_OWNER = 'Swompen';
 const PLUGIN_GUID = 'da36c4ef-1d10-4169-8a68-26b194d5301a';
@@ -22,8 +28,27 @@ test('release archive includes the upstream MIT license', async () => {
   const license = await text('LICENSE');
   assert.match(workflow, /cp\s+"\$\{GITHUB_WORKSPACE\}\/LICENSE"\s+"\$\{OUT_DIR\}\/LICENSE"/);
   assert.match(workflow, /zip\s+-j\s+"\$\{ZIP_PATH\}"[\s\S]*\bLICENSE\b/);
+  assert.match(workflow, /node scripts\/verify-release-archive\.mjs "\$\{ZIP_PATH\}"/);
   assert.match(license, /Copyright \(c\) 2026 varunaditya-plus/);
   assert.match(license, /Permission is hereby granted, free of charge/);
+});
+
+test('archive verifier enforces the exact distributable contents and MIT notice', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'sleekfin-archive-contract-'));
+  const archive = join(directory, 'release.zip');
+  const license = await text('LICENSE');
+  await Promise.all([
+    writeFile(join(directory, 'Jellyfin.Plugin.SleekFin.dll'), 'fixture'),
+    writeFile(join(directory, 'meta.json'), '{}'),
+    writeFile(join(directory, 'thumb.png'), 'fixture'),
+    writeFile(join(directory, 'LICENSE'), license),
+  ]);
+  await exec('zip', ['-j', archive, 'Jellyfin.Plugin.SleekFin.dll', 'meta.json', 'thumb.png', 'LICENSE'], { cwd: directory });
+  await exec(process.execPath, ['scripts/verify-release-archive.mjs', archive], { cwd: new URL('..', import.meta.url) });
+
+  const invalid = join(directory, 'invalid.zip');
+  await exec('zip', ['-j', invalid, 'meta.json'], { cwd: directory });
+  await assert.rejects(exec(process.execPath, ['scripts/verify-release-archive.mjs', invalid], { cwd: new URL('..', import.meta.url) }));
 });
 
 test('fork manifest preserves plugin identity while using fork-owned catalog URLs', async () => {

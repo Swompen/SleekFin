@@ -165,6 +165,7 @@ jobs:
               thumb.png \
               LICENSE
           )
+          node scripts/verify-release-archive.mjs "${ZIP_PATH}"
 
           CHECKSUM=$(md5sum "${ZIP_PATH}" | awk '{print toupper($1)}')
           SOURCE_URL="https://github.com/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}/releases/download/${VERSION}/${ZIP_NAME}"
