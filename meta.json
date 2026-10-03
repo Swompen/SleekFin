@@ -1,14 +1,14 @@
 {
   "category": "General",
-  "changelog": "Made TV focus visible above episode artwork and restored bundled MIT license",
+  "changelog": "Corrected Play and Resume labels with live user-data updates by @T9es",
   "description": "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
   "guid": "da36c4ef-1d10-4169-8a68-26b194d5301a",
   "name": "SleekFin",
   "overview": "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
   "owner": "Swompen",
   "targetAbi": "12.0.0.0",
-  "timestamp": "2026-10-03T21:32:14.0000000Z",
-  "version": "1.4.2.4",
+  "timestamp": "2026-10-03T23:17:48.0000000Z",
+  "version": "1.4.2.5",
   "status": "Active",
   "autoUpdate": false,
   "assemblies": [
