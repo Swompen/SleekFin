@@ -29,14 +29,20 @@ const state = {
   mount: null,
   page: null,
   previousPage: null,
+  apiClientTimer: 0,
   reconcileTimer: 0,
   retryTimer: 0,
   seasonPickerEnabled: false,
   seasons: [],
   started: false,
+  stopApiClient: null,
   stopHidden: null,
   stopHistory: null,
+  stopUserData: null,
+  userDataClient: null,
   stopWatching: null,
+  userDataRetry: false,
+  userDataRevision: 0,
 };
 
 // Jellyfin 12 is a hash router, so the route is carried in window.location.hash; the pathname
@@ -205,7 +211,7 @@ function mount() {
     revealNativePage();
     return;
   }
-  const actions = createActions(hero.actions, state.item.Type === 'Episode');
+  const actions = createActions(hero.actions, () => state.item);
   const sections = createSections(state.page);
   const similar = createSimilar(state.page);
   const episodes = ['Series', 'Season', 'Episode'].includes(state.item.Type) && state.seasons.length ? createEpisodes(state.page, state.item, state.seasons, state.seasonPickerEnabled) : null;
@@ -227,6 +233,98 @@ function mount() {
   concealUntilAlone(state.page);
 }
 
+// A notification for the item on screen can arrive before load() has installed it, when the route
+// change has already cleared the item and the request is still in flight. That notification cannot be
+// applied, and the response may have been read before the position was saved, so load() re-reads the
+// route instead of this applying user data to an item it may not belong to.
+function isItemLoading(id) {
+  return Boolean(id) && state.loadingId === id && state.currentId === id;
+}
+
+function onUserDataChanged(message, client) {
+  if (!client || client !== window.ApiClient || client !== state.userDataClient) return;
+  if (routeClient(state.currentServerId) !== client) return;
+  const item = state.item;
+  const data = message?.Data;
+  if (!data || data.UserId != client.getCurrentUserId()) return;
+  const itemId = item?.Id || (isItemLoading(state.currentId) ? state.currentId : '');
+  if (!itemId) return;
+  // Alternate versions share the same user data key, so a key match would apply another version's
+  // position to the item on screen.
+  const userData = (data.UserDataList || []).find((entry) => entry.ItemId == itemId);
+  if (!userData) return;
+  if (!item) {
+    state.userDataRevision += 1;
+    return;
+  }
+  item.UserData = userData;
+  scheduleReconcile();
+}
+
+function watchUserData() {
+  const client = window.ApiClient || null;
+  if (client === state.userDataClient) return;
+  state.stopUserData?.();
+  state.stopUserData = null;
+  state.userDataClient = client || null;
+  if (!client) return;
+  // The SDK's message type enum is not exposed as a global in the deployed web client, and its
+  // OutboundWebSocketMessageType.UserDataChanged member is this exact string.
+  state.stopUserData = client.subscribe(['UserDataChanged'], (message) => onUserDataChanged(message, client));
+}
+
+// Jellyfin 12 assigns this public global when a connection becomes active. Observe the assignment
+// directly so a server switch can rebind the socket listener without waiting for a route or DOM event.
+function watchApiClient() {
+  const original = Object.getOwnPropertyDescriptor(window, 'ApiClient');
+  if (original && !original.configurable) return null;
+  if (original && 'value' in original && !original.writable) return null;
+  if (original && !('value' in original) && (!original.get || !original.set)) return null;
+
+  let currentClient = original && 'value' in original ? original.value : window.ApiClient;
+  let assigned = false;
+  const get = original && !('value' in original)
+    ? () => original.get.call(window)
+    : () => currentClient;
+  const set = (client) => {
+    if (original && !('value' in original)) {
+      original.set.call(window, client);
+    } else {
+      currentClient = client;
+    }
+    assigned = true;
+    if (state.started) watchUserData();
+  };
+
+  Object.defineProperty(window, 'ApiClient', {
+    configurable: true,
+    enumerable: original?.enumerable ?? true,
+    get,
+    set,
+  });
+
+  return () => {
+    const current = Object.getOwnPropertyDescriptor(window, 'ApiClient');
+    if (current?.get !== get || current?.set !== set) return;
+    if (original) {
+      if ('value' in original) {
+        Object.defineProperty(window, 'ApiClient', { ...original, value: currentClient });
+      } else {
+        Object.defineProperty(window, 'ApiClient', original);
+      }
+    } else if (assigned) {
+      Object.defineProperty(window, 'ApiClient', {
+        configurable: true,
+        enumerable: true,
+        value: currentClient,
+        writable: true,
+      });
+    } else {
+      delete window.ApiClient;
+    }
+  };
+}
+
 function load(id, serverId) {
   const client = routeClient(serverId);
   if (!client) {
@@ -246,14 +344,26 @@ function load(id, serverId) {
   const userId = client.getCurrentUserId();
   const isCurrent = () => generation === state.generation && id === state.currentId;
   state.loadingId = id;
+  const revision = state.userDataRevision;
+  // Re-reading once is enough in practice: a notification is broadcast only after the position it
+  // carries was saved, so a request issued after it was read answers with that position. The retry
+  // is capped so a stream of notifications cannot spin the request instead.
+  const retrying = state.userDataRetry;
+  state.userDataRetry = false;
 
   // The settings request is started lazily by loadSeasons for a Series only, so it can never hold up
   // the item request or a non-Series page.
   client.getItem(userId, id)
     .then((mediaItem) => {
       if (!isCurrent()) return;
+      if (!retrying && revision !== state.userDataRevision) {
+        state.userDataRetry = true;
+        load(id, serverId);
+        return;
+      }
       state.item = mediaItem;
       state.loadingId = '';
+      state.userDataRetry = false;
       scheduleReconcile();
       if (!SUPPORTED_TYPES.includes(mediaItem.Type)) return;
 
@@ -400,6 +510,9 @@ function leaveDetail() {
 
 function reconcile() {
   if (!state.started) return;
+  // Jellyfin can assign or replace window.ApiClient after start(), so reconciliation keeps the
+  // subscription attached to the current client.
+  watchUserData();
   const currentRoute = route();
   const { id, serverId } = currentRoute;
   const page = findPage(id);
@@ -521,6 +634,11 @@ function start() {
     viewshow: true,
   });
   state.stopHistory = watchHistory();
+  state.stopApiClient = watchApiClient();
+  if (!state.stopApiClient) {
+    state.apiClientTimer = window.setInterval(watchUserData, 500);
+  }
+  watchUserData();
   onRouteChange();
 }
 
@@ -534,6 +652,13 @@ function stop() {
   state.stopWatching = null;
   state.stopHistory?.();
   state.stopHistory = null;
+  state.stopApiClient?.();
+  state.stopApiClient = null;
+  window.clearInterval(state.apiClientTimer);
+  state.apiClientTimer = 0;
+  state.stopUserData?.();
+  state.stopUserData = null;
+  state.userDataClient = null;
   reset();
 }
 
