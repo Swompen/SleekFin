@@ -168,8 +168,10 @@ test('episode list lifecycle installs and re-syncs navigation after rendering', 
   assert.match(source, /syncEpisodeNavigation\(list,/);
 });
 
-test('episode focus marker has a visible authored style', async () => {
+test('episode focus marker paints above artwork and keeps the legacy selector independent', async () => {
   const source = await readFile(new URL('../src/Jellyfin.Plugin.SleekFin/Inject/Details/sleekfin-details-episodes.css', import.meta.url), 'utf8');
-  assert.match(source, /\.sleekfin-details-episode-action\[data-sleekfin-focused="true"\]/);
-  assert.match(source, /box-shadow:/);
+  assert.match(source, /\.sleekfin-details-episode-action::after\s*\{[^}]*pointer-events:\s*none;[^}]*z-index:\s*3;/s);
+  assert.match(source, /\.sleekfin-details-episode-action:focus-visible::after\s*\{[^}]*opacity:\s*1;/s);
+  assert.match(source, /\.sleekfin-details-episode-action\[data-sleekfin-focused="true"\]::after\s*\{[^}]*opacity:\s*1;/s);
+  assert.doesNotMatch(source, /:focus-visible[^,{]*,\s*\n?\.sleekfin-details-episode-action\[data-sleekfin-focused=/);
 });

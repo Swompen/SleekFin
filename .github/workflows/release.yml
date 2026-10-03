@@ -156,12 +156,14 @@ jobs:
           mv meta.json.tmp meta.json
 
           mkdir -p "${DIST_DIR}"
+          cp "${GITHUB_WORKSPACE}/LICENSE" "${OUT_DIR}/LICENSE"
           (
             cd "${OUT_DIR}"
             zip -j "${ZIP_PATH}" \
               Jellyfin.Plugin.SleekFin.dll \
               meta.json \
-              thumb.png
+              thumb.png \
+              LICENSE
           )
 
           CHECKSUM=$(md5sum "${ZIP_PATH}" | awk '{print toupper($1)}')

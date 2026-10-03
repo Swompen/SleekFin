@@ -17,6 +17,15 @@ test('release workflow publishes only fork-owned assets with automatic updates d
   assert.doesNotMatch(workflow, /REPO_OWNER: "varunaditya-plus"/);
 });
 
+test('release archive includes the upstream MIT license', async () => {
+  const workflow = await text('.github/workflows/release.yml');
+  const license = await text('LICENSE');
+  assert.match(workflow, /cp\s+"\$\{GITHUB_WORKSPACE\}\/LICENSE"\s+"\$\{OUT_DIR\}\/LICENSE"/);
+  assert.match(workflow, /zip\s+-j\s+"\$\{ZIP_PATH\}"[\s\S]*\bLICENSE\b/);
+  assert.match(license, /Copyright \(c\) 2026 varunaditya-plus/);
+  assert.match(license, /Permission is hereby granted, free of charge/);
+});
+
 test('fork manifest preserves plugin identity while using fork-owned catalog URLs', async () => {
   const manifest = JSON.parse(await text('manifest.json'));
   const plugin = manifest[0];
