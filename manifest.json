@@ -10,6 +10,15 @@
     "repositoryUrl": "https://github.com/Swompen/SleekFin",
     "versions": [
       {
+        "version": "1.4.2.3",
+        "changelog": "Added TV episode navigation and fork-owned releases",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Swompen/SleekFin/releases/download/1.4.2.3/Jellyfin.Plugin.SleekFin_12.0.0.zip",
+        "checksum": "036EA92826CE7FAF6D1C08548B2A09D9",
+        "timestamp": "2026-10-03T21:10:00.0000000Z",
+        "dependencies": []
+      },
+      {
         "version": "1.4.2.2",
         "changelog": "Fixed SleekFin styling on SeerrFin tabs in Modern layout",
         "targetAbi": "12.0.0.0",

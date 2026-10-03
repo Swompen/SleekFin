@@ -1,14 +1,14 @@
 {
   "category": "General",
-  "changelog": "Fixed SleekFin styling on SeerrFin tabs in Modern layout",
+  "changelog": "Added TV episode navigation and fork-owned releases",
   "description": "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
   "guid": "da36c4ef-1d10-4169-8a68-26b194d5301a",
   "name": "SleekFin",
   "overview": "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
   "owner": "Swompen",
   "targetAbi": "12.0.0.0",
-  "timestamp": "2026-10-03T10:43:43.0000000Z",
-  "version": "1.4.2.2",
+  "timestamp": "2026-10-03T21:10:00.0000000Z",
+  "version": "1.4.2.3",
   "status": "Active",
   "autoUpdate": false,
   "assemblies": [
